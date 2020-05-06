@@ -1,0 +1,86 @@
+<!DOCTYPE HTML><html>
+
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://code.highcharts.com/highcharts.js"></script>
+  <style>
+    body {
+      min-width: 310px;
+    	max-width: 1000px;
+    	height: 600px;
+      margin: 0 auto;
+    }
+    h2 {
+      font-family: Arial;
+      font-size: 2.5rem;
+      text-align: center;
+    }
+    .dot 
+    {
+      height: 25px;
+      width: 25px;
+      background-color: #bbb;
+      border-radius: 50%;
+      display: inline-block;
+    }
+  </style>
+</head>
+
+<body>
+  <h2>WPET system</h2>
+  <div id="chart-temperature" class="container"></div>
+  <h2>Reed Switch left chest </h2>
+
+  <input type=”hidden” name=”pin” value=”5″ id=”pin5″ />
+  <input type=”range” style=”width: 90px; height: 30px;” id=”dac5″ min=”0″ max=”255″ value=”0″ step=”1″ onchange=”sendDac  (document.getElementById(‘pin5’).value,this.value);”/>
+  <span id=”valueDac5″>0</span>
+
+</body>
+
+<script>
+var chartT = new Highcharts.Chart({
+  chart:{ renderTo : 'chart-temperature' },
+  title: { text: 'Body temperature' },
+  series: [{
+    showInLegend: false,
+    data: []
+  }],
+  plotOptions: {
+    line: { animation: false,
+      dataLabels: { enabled: true }
+    },
+    series: { color: '#ff0000' }
+  },
+  xAxis: { type: 'datetime',
+    dateTimeLabelFormats: { second: '%H:%M' }
+  },
+  yAxis: {
+    title: { text: 'Temperature [°C]' }
+  },
+  credits: { enabled: false }
+});
+
+setInterval(function ( ) 
+  {
+  var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() 
+    {
+    if (this.readyState == 4 && this.status == 200) {
+      var x = (new Date()).getTime(),
+          y = parseFloat(this.responseText);
+      //console.log(this.responseText);
+      if(chartT.series[0].data.length > 10) {
+        chartT.series[0].addPoint([x, y], true, true, true);
+      } else {
+        chartT.series[0].addPoint([x, y], true, false, true);
+      }
+    }
+  };
+  xhttp.open("GET", "/temperature", true);
+  xhttp.send();
+}, 10000 ) ;
+
+
+
+</script>
+</html>
